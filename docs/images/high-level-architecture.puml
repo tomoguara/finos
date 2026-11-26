@@ -1,0 +1,63 @@
+@startuml high-level-architecture
+' High-level data flow: §2.1 of docs/systems-design-and-architecture.md
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam packageStyle rectangle
+skinparam ArrowColor #444444
+skinparam component {
+  BackgroundColor #F4F7FB
+  BorderColor #4A6FA5
+}
+skinparam database {
+  BackgroundColor #FFF8E7
+  BorderColor #B8860B
+}
+skinparam cloud {
+  BackgroundColor #EEF7EE
+  BorderColor #3C8D3C
+}
+
+actor Customer
+component "Entry points\n(finos CLI, tests,\nask() / ask_* helpers)" as Entry
+
+component "guarded(): input guards\nregex → moderation →\ninjection classifier\n(fail open)" as InGuard
+package "LangGraph StateGraph  —  src/finos/graph.py" as Graph {
+  component "Supervisor\nclassify_intent" as Sup
+  component "Policy agent\n(RAG)" as Pol
+  component "Account agent\n(record lookup)" as Acc
+  component "Escalation agent\n(empathy + contact)" as Esc
+}
+
+component "guarded(): output guards\nSSN, escalation rules, freeze reason,\ncontact, competitor, crisis sentence\n(fail closed)" as OutGuard
+
+database "Policy index\ndata/chroma/\n(from data/policy-docs/)" as Chroma
+database "Mock accounts\ndata/mock_accounts.json" as Accounts
+cloud "Chat + embedding models\nget_llm() / get_embeddings()\nOllama or OpenAI" as LLM
+cloud "OpenAI Moderation +\ninjection classifier" as Mod
+cloud "LangSmith\n(traces, SSN-masked)" as Smith
+database "Cost audit log\nlogs/audit_log.jsonl\n(no query text)" as Audit
+
+Customer --> Entry : query
+Entry --> InGuard
+InGuard --> Sup : passed
+InGuard -[norank]-> Entry : blocked →\nGUARDRAIL_FALLBACK_MESSAGE
+Sup --> Pol : policy
+Sup --> Acc : account_status
+Sup --> Esc : escalation
+Pol --> OutGuard
+Acc --> OutGuard
+Esc --> OutGuard
+OutGuard -[norank]-> Entry : final SupportState
+Entry -[norank]-> Customer : response
+
+Pol --> Chroma : similarity search
+Acc --> Accounts : resolve ID
+Sup ..> LLM
+Pol ..> LLM
+Acc ..> LLM : found only
+Esc ..> LLM
+InGuard -left..> Mod
+Entry -left..> Smith : one trace\nper request
+Entry -right..> Audit : one record\nper query
+@enduml

@@ -1,0 +1,51 @@
+[project]
+name = "finos"
+version = "0.1.0"
+description = "SecureBank multi-agent customer support system: a LangGraph supervisor routing to policy, account, and escalation agents"
+readme = "README.md"
+authors = [
+    { name = "Ton Oguara", email = "tomoguara@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "langchain>=0.3.14,<0.4",
+    "langchain-openai>=0.3.1,<0.4",
+    "langchain-ollama>=0.3,<0.4",
+    "langchain-chroma>=0.2.1,<0.3",
+    "langchain-text-splitters>=0.3,<0.4",
+    "langgraph>=0.2.60,<0.3",
+    "langsmith>=0.14,<0.15",
+    "chromadb>=0.6.3,<0.7",
+    "openai>=1.59.9,<2",
+    "python-dotenv>=1.1.1",
+    "tiktoken>=0.8.0",
+    "typer>=0.27,<0.28",
+]
+
+[dependency-groups]
+dev = [
+    "pathspec>=1.1.1",
+    "pytest",
+    "pyyaml>=6.0.3",
+]
+
+[tool.pytest.ini_options]
+# Tests that call real models carry @pytest.mark.live and are skipped by
+# default. Run them on request with: uv run pytest -m live
+markers = [
+    "live: calls real chat and embedding models; deselected by default",
+]
+addopts = "-m 'not live'"
+filterwarnings = [
+    # chromadb 0.6 touches a pydantic attribute deprecated in 2.11; not ours.
+    "ignore:Accessing the 'model_fields' attribute:DeprecationWarning:chromadb",
+    # langsmith 0.14's evaluator key extraction uses ast.Str; not ours.
+    "ignore:ast.Str is deprecated:DeprecationWarning:langsmith",
+]
+
+[project.scripts]
+finos = "finos.cli.main:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"

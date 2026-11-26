@@ -1,0 +1,62 @@
+@startuml guardrails-flow
+' Guardrails request flow: §9.3 of docs/systems-design-and-architecture.md
+' Source: src/finos/guardrails/ (__init__.py, input.py, output.py)
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam ActivityBackgroundColor #F4F7FB
+skinparam ActivityBorderColor #4A6FA5
+skinparam ArrowColor #444444
+
+title Guardrails — guarded(query, run)
+
+start
+:crisis = the crisis pattern matches the query;
+partition "Input guards (fail open: a layer error lets the query through)" {
+  :1. Regex: ssn_extraction, investment_advice,\ncompetitor, harmful;
+  if (Blocked?) then (no)
+    :2. OpenAI Moderation (omni-moderation-latest);
+    note right
+      violence, illicit, hate, sexual/minors block;
+      self-harm categories set crisis = true
+    end note
+    if (Blocked?) then (no)
+      :3. Injection classifier ([guardrails] classifier_model);
+    else (yes)
+    endif
+  else (yes)
+  endif
+  note right
+    Each layer runs only if enabled; without
+    OPENAI_API_KEY the two model layers are off
+    (one stderr line). The first block stops the chain.
+  end note
+}
+if (Blocked and not crisis?) then (yes)
+  :Return the blocked state:\nresponse = GUARDRAIL_FALLBACK_MESSAGE,\nintent = policy, nothing retrieved;
+  note right: no agent or model call
+else (no)
+  :run(query): the graph, or one ask_* agent;
+  partition "Output guards (fail closed: an error returns the fallback)" {
+    :SSN redaction;
+    if (intent?) then (escalation)
+      :Escalation rules\n(policy claim, false promise → fallback);
+    elseif () then (account_status)
+      :Remove freeze_reason unless asked why;
+    else (policy)
+    endif
+    :Contact check (invented contact details → fallback);
+    :Competitor check (→ fallback);
+  }
+  if (crisis?) then (yes)
+    :Ensure CRISIS_SUPPORT_MESSAGE is in the reply;
+    note right
+      Runs after the checks above and is
+      added even if a check failed
+    end note
+  else (no)
+  endif
+endif
+:Tag the trace's root with guardrail:<decision>\nwhen anything but "passed" happened;
+:Return the state;
+stop
+@enduml

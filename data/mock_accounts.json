@@ -1,0 +1,104 @@
+[
+  {
+    "account_id": "ACC-12345",
+    "holder_name": "Alice Johnson",
+    "account_type": "Premium Checking",
+    "balance": 12450.75,
+    "status": "active",
+    "monthly_fee": 12.99,
+    "monthly_fee_waived": true,
+    "overdraft_protection": true,
+    "ssn_last4": "6789",
+    "recent_transactions": [
+      {
+        "date": "2026-10-28",
+        "description": "Direct deposit - Northwind Payroll",
+        "amount": 3200.0
+      },
+      {
+        "date": "2026-10-24",
+        "description": "Westside Grocery",
+        "amount": -142.38
+      },
+      {
+        "date": "2026-10-19",
+        "description": "Harbor Electric - autopay",
+        "amount": -96.4
+      },
+      {
+        "date": "2026-10-11",
+        "description": "Transfer to High-Yield Savings",
+        "amount": -500.0
+      }
+    ]
+  },
+  {
+    "account_id": "ACC-67890",
+    "holder_name": "Bob Smith",
+    "account_type": "Basic Checking",
+    "balance": 234.5,
+    "status": "active",
+    "monthly_fee": 0.0,
+    "monthly_fee_waived": false,
+    "overdraft_protection": false,
+    "ssn_last4": "4321",
+    "recent_transactions": [
+      {
+        "date": "2026-10-30",
+        "description": "Overdraft fee",
+        "amount": -35.0
+      },
+      {
+        "date": "2026-10-29",
+        "description": "Cedar Street Auto Repair",
+        "amount": -412.75
+      },
+      {
+        "date": "2026-10-22",
+        "description": "Direct deposit - Lakeside Diner",
+        "amount": 610.0
+      }
+    ]
+  },
+  {
+    "account_id": "ACC-11111",
+    "holder_name": "Carol Davis",
+    "account_type": "High-Yield Savings",
+    "balance": 85320.0,
+    "status": "frozen",
+    "freeze_reason": "Suspected fraudulent activity under investigation",
+    "monthly_fee": 0.0,
+    "monthly_fee_waived": true,
+    "overdraft_protection": false,
+    "ssn_last4": "9876",
+    "recent_transactions": [
+      {
+        "date": "2026-10-27",
+        "description": "Interest payment",
+        "amount": 291.14
+      },
+      {
+        "date": "2026-10-20",
+        "description": "Outgoing wire - unrecognized recipient",
+        "amount": -7500.0
+      },
+      {
+        "date": "2026-10-09",
+        "description": "Transfer from Premium Checking",
+        "amount": 500.0
+      }
+    ]
+  },
+  {
+    "account_id": "ACC-22222",
+    "holder_name": "Dana Lee",
+    "account_type": "Student Checking",
+    "balance": 0.0,
+    "status": "pending",
+    "monthly_fee": 0.0,
+    "monthly_fee_waived": false,
+    "overdraft_protection": false,
+    "ssn_last4": "1357",
+    "recent_transactions": []
+  }
+]

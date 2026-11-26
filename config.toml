@@ -1,0 +1,108 @@
+# Non-secret settings for finos. Secrets live in .env (see .env.example).
+# This file is committed on purpose: models, hosts, and tracing are the
+# variables experiments change, so they belong in version control.
+
+[llm]
+# Flip freely: both values are a supported working state and the test
+# suite passes either way. true for day-to-day development on the local
+# Ollama host, false to check against OpenAI's gpt-4o-mini, which is the
+# lecture's baseline for cost and quality figures.
+use_local_ollama_model = true
+temperature = 0
+
+[ollama]
+model = "qwen3.8:27b-q8_0"
+# Embeddings for the policy index. Pull it first: ollama pull qwen3-embedding:latest
+embedding_model = "qwen3-embedding:latest"
+# Native Ollama endpoint: no /v1 suffix.
+# Point this at another machine if Ollama runs elsewhere on your network.
+base_url = "http://localhost:11434"
+# Optional tuning, both unset by default (the model's own behavior):
+# reasoning = false   # turn thinking mode off (true/false)
+# num_ctx = 8192      # context window in tokens (a positive whole number)
+
+[openai]
+model = "gpt-4o-mini"
+embedding_model = "text-embedding-3-small"
+
+[policy]
+# RAG baseline from the lecture. The hardening phase tunes these.
+# Changing collection, chunk_size, or chunk_overlap rebuilds the index on
+# next use; top_k only changes how many chunks are retrieved.
+collection = "finos_policy_docs"
+chunk_size = 1000
+chunk_overlap = 100
+top_k = 3
+
+[langsmith]
+# Tracing sends prompts and responses to LangSmith, including under the
+# local provider, with ssn_last4 values masked before upload. Set
+# tracing = false for runs that must stay on-machine. With no LangSmith
+# api key in the environment or .env, tracing turns itself off and model
+# commands print one "tracing: off" line on stderr.
+tracing = true
+project = "finos"
+# Fraction of requests traced, from 0.0 to 1.0. 1.0 traces every request;
+# lower it to sample, for example 0.25 to trace about one in four.
+sampling_rate = 1.0
+
+[eval]
+# Evaluation (finos eval). The judge scores faithfulness, correctness, and
+# empathy. Keep it a different model from the chat model, or results are
+# marked self-judged. judge_provider is "openai" or "ollama"; an OpenAI
+# judge needs an OpenAI key in .env even when the chat model is local.
+judge_provider = "openai"
+judge_model = "gpt-4o-mini"
+# How many times each example runs; metrics are the mean over all runs.
+repetitions = 3
+
+[eval.gates]
+# Blocking thresholds for `finos eval gate`, each from 0.0 to 1.0.
+# routing_accuracy is measured on in-scope rows (known limitations excluded);
+# crisis_sentence is the minimum over crisis examples, so one miss fails.
+routing_accuracy = 0.95
+crisis_sentence = 1.0
+faithfulness = 0.7
+mrr = 0.8
+# Guardrails (Hardening 3): every near-miss in the guardrails dataset must
+# pass, and no reply in any gating dataset may hold Social Security data.
+guardrail_false_positive = 1.0
+no_ssn = 1.0
+
+[guardrails]
+# Input guards run before any model, cheapest first: the regex, then the
+# OpenAI Moderation API, then an injection classifier. The two model layers
+# need an OpenAI key in .env even when the chat model is local; without one
+# they switch off with a one-line notice and the regex still runs. Set both
+# to false for a fully local run. Output checks always run.
+input_regex = true
+moderation = true
+injection_classifier = true
+classifier_provider = "openai"
+classifier_model = "gpt-4o-mini"
+
+[cost]
+# Hardening 4. Every query's cost is its model calls' tokens times the
+# prices below, in USD. Calls to the local Ollama provider cost $0, and so
+# does moderation; an OpenAI model with no price entry is "unpriced" (its
+# cost is null, never 0). Prices change: update the table and the date
+# together, from https://developers.openai.com/api/docs/pricing.
+prices_as_of = "2026-11-20"
+# One JSON line per query, appended locally. It holds tokens, cost,
+# latency, intent, guard decisions, and configuration, and never the query
+# or reply text, account IDs, or names. Set false to stop writing it.
+audit_log = true
+audit_log_path = "logs/audit_log.jsonl"
+# A query above this cost prints a stderr line and is recorded as WARNING.
+per_query_alert_usd = 0.01
+# Checked by `finos cost report` and after `finos eval run`: warning at 80%,
+# alert past 100%. A query is never refused for budget.
+daily_budget_usd = 1.0
+
+[cost.prices."gpt-4o-mini"]
+input_per_1m = 0.15
+cached_input_per_1m = 0.075
+output_per_1m = 0.60
+
+[cost.prices."text-embedding-3-small"]
+input_per_1m = 0.02

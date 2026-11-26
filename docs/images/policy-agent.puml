@@ -1,0 +1,36 @@
+@startuml policy-agent
+' Policy agent (RAG path): §4.1 of docs/systems-design-and-architecture.md
+' Source: src/finos/agents/policy.py, src/finos/vectorstore.py
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam ActivityBackgroundColor #F4F7FB
+skinparam ActivityBorderColor #4A6FA5
+skinparam ArrowColor #444444
+
+title Policy agent — policy_agent(state)
+
+start
+:Read state['query'];
+partition "traced_search(query)  —  policy_retrieval run" {
+  if (Index missing or fingerprint stale?) then (yes)
+    :Load data/policy-docs/*.md;
+    :Split into chunks\n([policy] chunk_size / chunk_overlap);
+    :Embed chunks and write the Chroma\ncollection in data/chroma/;
+  else (no)
+  endif
+  :Embed the query\n(get_embeddings());
+  :Cosine search: top [policy] top_k chunks;
+}
+:format_docs(hits) → context string\n(may be empty);
+:Call the shared chat model once:\nsystem = POLICY_SYSTEM_PROMPT + context\nhuman = question;
+note right
+  The model is called even when nothing
+  was retrieved; the prompt tells it to
+  answer NOT_FOUND_MESSAGE when the
+  context lacks the answer.
+end note
+:Return response, context, and
+retrieved_sources (bare filenames,
+distinct, most relevant first);
+stop
+@enduml

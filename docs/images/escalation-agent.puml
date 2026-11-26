@@ -1,0 +1,36 @@
+@startuml escalation-agent
+' Escalation agent: §4.3 of docs/systems-design-and-architecture.md
+' Source: src/finos/agents/escalation.py
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam ActivityBackgroundColor #F4F7FB
+skinparam ActivityBorderColor #4A6FA5
+skinparam ArrowColor #444444
+
+title Escalation agent — escalation_agent(state)
+
+start
+:Read state['query'];
+:Call the shared chat model once:\nsystem = ESCALATION_SYSTEM_PROMPT\nhuman = question;
+note right
+  The prompt asks for 2–4 empathetic sentences:
+  no amounts or policy claims, no handoff or
+  callback claims, no promised outcomes, and
+  CRISIS_SUPPORT_MESSAGE verbatim on distress.
+end note
+partition "assemble_response(raw)  —  escalation_assembly run" {
+  :Strip the reply;
+  if (Reply empty?) then (yes)
+    :body = ESCALATION_FALLBACK_MESSAGE;
+  else (no)
+    :body = stripped reply;
+  endif
+  :response = body + blank line +\nthe fixed SUPPORT_CONTACT block;
+  note right
+    Appended by code on every reply,
+    even if the model wrote its own
+    contact line.
+  end note
+}
+stop
+@enduml

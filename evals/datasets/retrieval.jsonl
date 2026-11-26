@@ -1,0 +1,16 @@
+{"id": "ret-overdraft-fee", "inputs": {"query": "What is the overdraft fee?"}, "outputs": {"relevant_sources": ["account_fees.md"]}, "metadata": {"kind": "easy"}}
+{"id": "ret-domestic-wire", "inputs": {"query": "How much is a domestic outgoing wire?"}, "outputs": {"relevant_sources": ["transfer_policy.md"]}, "metadata": {"kind": "easy"}}
+{"id": "ret-loan-late-fee", "inputs": {"query": "What is the late fee on a loan payment?"}, "outputs": {"relevant_sources": ["loan_policy.md"]}, "metadata": {"kind": "easy"}}
+{"id": "ret-liability-window", "inputs": {"query": "How long do I have to report an unauthorized transaction?"}, "outputs": {"relevant_sources": ["fraud_policy.md"]}, "metadata": {"kind": "easy"}}
+{"id": "ret-replacement-card", "inputs": {"query": "How much does a replacement debit card cost?"}, "outputs": {"relevant_sources": ["account_fees.md", "fraud_policy.md"]}, "metadata": {"kind": "overlapping"}}
+{"id": "ret-ach-limit", "inputs": {"query": "What is the daily ACH transfer limit?"}, "outputs": {"relevant_sources": ["transfer_policy.md"]}, "metadata": {"kind": "easy"}}
+{"id": "ret-credit-score", "inputs": {"query": "What is the minimum credit score for a personal loan?"}, "outputs": {"relevant_sources": ["loan_policy.md"]}, "metadata": {"kind": "easy"}}
+{"id": "ret-provisional-credit", "inputs": {"query": "When will I get provisional credit for a disputed charge?"}, "outputs": {"relevant_sources": ["fraud_policy.md"]}, "metadata": {"kind": "easy"}}
+{"id": "ret-fee-waiver", "inputs": {"query": "How can I avoid the Premium Checking monthly fee?"}, "outputs": {"relevant_sources": ["account_fees.md"]}, "metadata": {"kind": "ambiguous"}}
+{"id": "ret-overdraft-protection", "inputs": {"query": "How much does an overdraft protection transfer cost?"}, "outputs": {"relevant_sources": ["account_fees.md"]}, "metadata": {"kind": "overlapping"}}
+{"id": "ret-p2p-limit", "inputs": {"query": "How much can I send to another SecureBank customer per day?"}, "outputs": {"relevant_sources": ["transfer_policy.md"]}, "metadata": {"kind": "ambiguous"}}
+{"id": "ret-prepayment", "inputs": {"query": "Is there a penalty for paying off my loan early?"}, "outputs": {"relevant_sources": ["loan_policy.md"]}, "metadata": {"kind": "ambiguous"}}
+{"id": "ret-money-back-fraud", "inputs": {"query": "How long until I get my money back after fraud?"}, "outputs": {"relevant_sources": ["fraud_policy.md"]}, "metadata": {"kind": "ambiguous"}}
+{"id": "ret-send-abroad", "inputs": {"query": "What does it cost to send money to another country?"}, "outputs": {"relevant_sources": ["transfer_policy.md"]}, "metadata": {"kind": "ambiguous"}}
+{"id": "ret-cashiers-check", "inputs": {"query": "Is there a fee for a cashier's check?"}, "outputs": {"relevant_sources": ["account_fees.md"]}, "metadata": {"kind": "easy"}}
+{"id": "ret-fee-reversal", "inputs": {"query": "Can a representative refund an overdraft fee?"}, "outputs": {"relevant_sources": ["account_fees.md"]}, "metadata": {"kind": "cross-domain"}}

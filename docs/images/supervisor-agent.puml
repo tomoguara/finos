@@ -1,0 +1,42 @@
+@startuml supervisor-agent
+' Supervisor (router) agent: §5 of docs/systems-design-and-architecture.md
+' Source: src/finos/agents/supervisor.py
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam ActivityBackgroundColor #F4F7FB
+skinparam ActivityBorderColor #4A6FA5
+skinparam ArrowColor #444444
+
+title Supervisor — classify_intent(state) and route_by_intent(state)
+
+start
+:Read state['query'];
+:Call the shared chat model once:\nsystem = SUPERVISOR_SYSTEM_PROMPT\nhuman = question;
+note right
+  Classify by subject, not tone or
+  account number; distress → escalation;
+  policy is the catch-all. Temperature 0,
+  no few-shot examples.
+end note
+partition "normalize_intent(raw)  —  normalize_intent run" {
+  :Trim and lowercase;
+  :Read "account status" / "account-status"\nas account_status;
+  if (A vocabulary member appears\nas a whole word?) then (yes)
+    :intent = the first member found;
+  else (no)
+    :intent = policy (fallback);
+  endif
+}
+:Write state['intent'];
+partition "route_by_intent(state)  —  no model call" {
+  switch (state['intent'])
+  case (policy)
+    :policy_agent;
+  case (account_status)
+    :account_agent;
+  case (escalation)
+    :escalation_agent;
+  endswitch
+}
+stop
+@enduml

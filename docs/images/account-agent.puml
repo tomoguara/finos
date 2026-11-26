@@ -1,0 +1,46 @@
+@startuml account-agent
+' Account agent (record lookup path): §4.2 of docs/systems-design-and-architecture.md
+' Source: src/finos/agents/account.py, src/finos/accounts.py
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam ActivityBackgroundColor #F4F7FB
+skinparam ActivityBorderColor #4A6FA5
+skinparam ArrowColor #444444
+
+title Account agent — account_agent(state)
+
+start
+:Read state['query'];
+partition "accounts.resolve(query)  —  account_resolution run" {
+  :Extract IDs with a regex\n(ACC + optional space or dash + 5 digits),\nnormalized to ACC-12345;
+  if (How many distinct IDs?) then (none)
+    :Outcome no_id;
+    :response = ACCOUNT_NO_ID_MESSAGE;
+    note right: no model call
+    stop
+  elseif () then (more than one)
+    :Outcome multiple_ids;
+    :response = ACCOUNT_MULTIPLE_IDS_MESSAGE;
+    note right: no model call
+    stop
+  else (one)
+    :Look up the ID in data/mock_accounts.json;
+    if (Record found?) then (no)
+      :Outcome not_found;
+      :response = ACCOUNT_NOT_FOUND_MESSAGE\n(ends with SUPPORT_CONTACT);
+      note right: no model call
+      stop
+    else (yes)
+      :Outcome found;
+    endif
+  endif
+}
+:Render the record as JSON\nwithout ssn_last4 (data minimization);
+:Call the shared chat model once:\nsystem = ACCOUNT_SYSTEM_PROMPT + record\nhuman = question;
+:response = the model's answer;
+note right
+  context and retrieved_sources
+  are never written on this path
+end note
+stop
+@enduml
